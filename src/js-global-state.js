@@ -54,7 +54,7 @@ const globalState = (initialize = false, initialState = {}, afterInitialize = ()
   };
 
   // Serialization equality: slower for huge objects, but good for now.
-  const isEqual = ((objectA, objectB)) => {
+  const isEqual = (objectA, objectB) => {
     const stringify = (obj) => JSON.stringify(Array.from(obj.entries()));
 
     return stringify(objectA) === stringify(objectB);
