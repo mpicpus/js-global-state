@@ -1,61 +1,63 @@
-// import sessionState from "./globalState/sessionState";
+const globalStateProxyHandler = {
+  set(target, key, value) {
+    target[key] = value;
+
+    broadcastSubscribers(key)
+
+    return {target, key, value};
+  }
+};
+
+export const broadcastSubscribers = (key) => {
+  if (globalThis._globalListeners?.length) {
+    globalThis._globalListeners.forEach(item => {
+      const [_id, varName, callback] = item;
+      if (varName && key === varName && callback) callback();
+    });
+  }
+}
 
 const globalState = (initialize = false, initialState = {}, afterInitialize = () => {}) => {
   const initializeGlobalState = () => {
-    const state = new Map(Object.entries(initialState || {}));
+    const state = initialState || {};
 
     setGlobalState(null, state);
     afterInitialize();
   };
 
-  const globalStateProxyHandler = {
-    set(target, key, value) {
-      target[key] = value;
-
-      if (globalThis.globalListeners) {
-        globalThis.globalListeners.forEach(item => {
-          const [varName, callback] = item;
-          if (varName && key !== varName) return;
-          if (callback) callback();
-        });
-      }
-
-      return {target, key, value};
-    }
-  };
-
   const addListener = (varName = null, callback = () => {}) => {
     const generateRandomId = () => Math.random().toString().replace(".", "");
 
-    globalThis.globalListeners = globalThis.globalListeners || [];
+    globalThis._globalListeners = globalThis._globalListeners || [];
 
     const id = generateRandomId();
     const taggedListener = [id, varName, callback];
-    globalThis.globalListeners.push(taggedListener);
+    globalThis._globalListeners.push(taggedListener);
 
-    return id;
+    return taggedListener;
   };
 
-  const removeListener = (id) => {
-    globalThis.globalListeners = globalThis.globalListeners.filter(item => item[0] !== id);
+  const removeListener = (taggedListener) => {
+    globalThis._globalListeners = globalThis._globalListeners.filter(item => item[0] !== id);
   };
 
   const setGlobalState = (name = null, newState = {}) => {
-    newState = newState instanceof Map ? newState : new Map(Object.entries(newState || {}));
     const state = getGlobalState();
 
-    const baseState = name ? state.get(name) : state;
-    const updatedState = new Map([...baseState, ...newState]);
+    const baseState = name ? state[name] : state;
+    const updatedState = isObject(baseState) ? {...baseState, ...newState} : newState;
 
     if (isEqual(baseState, updatedState)) return;
 
-    if (name) state.set(name, updatedState);
-    else globalThis.globalState = new Proxy(updatedState, globalStateProxyHandler);
+    if (name) state[name] = updatedState;
+    else globalThis._globalState = new Proxy(updatedState, globalStateProxyHandler);
   };
+
+  const isObject = (obj) => obj?.constructor === Object;
 
   // Serialization equality: slower for huge objects, but good for now.
   const isEqual = (objectA, objectB) => {
-    const stringify = (obj) => JSON.stringify(Array.from(obj.entries()));
+    const stringify = (obj) => JSON.stringify(obj);
 
     return stringify(objectA) === stringify(objectB);
   };
@@ -66,8 +68,8 @@ const globalState = (initialize = false, initialState = {}, afterInitialize = ()
 };
 
 export const getGlobalState = (name = null) => {
-  const globalState = globalThis.globalState || new Proxy(new Map(), globalStateProxyHandler);
-  return name ? globalState[name] : globalState;
+  globalThis._globalState ||= new Proxy({}, globalStateProxyHandler);
+  return name ? globalThis._globalState[name] : globalThis._globalState;
 };
 
 // small React compatibility layer for initialization.
