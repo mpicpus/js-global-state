@@ -1,14 +1,12 @@
 const globalStateProxyHandler = {
   set(target, key, value) {
     target[key] = value;
-
-    broadcastSubscribers(key)
-
+    broadcastStateUpdate(key)
     return {target, key, value};
   }
 };
 
-export const broadcastSubscribers = (key) => {
+export const broadcastStateUpdate = (key) => {
   if (globalThis._globalListeners?.length) {
     globalThis._globalListeners.forEach(item => {
       const [_id, varName, callback] = item;
@@ -34,7 +32,7 @@ const globalState = (initialize = false, initialState = {}, afterInitialize = ()
     const taggedListener = [id, varName, callback];
     globalThis._globalListeners.push(taggedListener);
 
-    return taggedListener;
+    return id;
   };
 
   const removeListener = (taggedListener) => {

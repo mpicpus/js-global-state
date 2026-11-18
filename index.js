@@ -1,4 +1,4 @@
-import globalState, {broadcastSubscribers} from "./src/js-global-state.js";
+import globalState, {broadcastStateUpdate} from "./src/js-global-state.js";
 
-export {broadcastSubscribers};
+export {broadcastStateUpdate};
 export default globalState;
