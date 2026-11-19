@@ -26,17 +26,27 @@ const globalState = (initialize = false, initialState = {}, afterInitialize = ()
   const addListener = (varName = null, callback = () => {}) => {
     const generateRandomId = () => Math.random().toString().replace(".", "");
 
-    globalThis._globalListeners = globalThis._globalListeners || [];
+    globalThis._globalListeners ||= [];
+    globalThis._globalListenerBoard ||= {};
+    globalThis._globalListenerBoard[varName] ||= 0; 
 
     const id = generateRandomId();
     const taggedListener = [id, varName, callback];
     globalThis._globalListeners.push(taggedListener);
 
+    globalThis._globalListenerBoard[varName]++;
+
     return id;
   };
 
   const removeListener = (taggedListener) => {
+    const [id, varName] = taggedListener[0];
+    if (!id) return;
+
     globalThis._globalListeners = globalThis._globalListeners.filter(item => item[0] !== id);
+    
+    if (varName && globalThis._globalListenerBoard[varName] > 0)
+      globalThis._globalListenerBoard[varName]--;
   };
 
   const setGlobalState = (name = null, newState = {}) => {
