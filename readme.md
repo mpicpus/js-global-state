@@ -56,7 +56,7 @@ removeListener(listenerID)
 * `addListener(varName = "", callback = () => {})` => listens to changes in a specific state key, passes the callback to be executed. It returns the listener ID, which will be used to clean it up.
   * Arguments:
     * `varName` (string)
-    * `callback` (function)
+    * `callback` (function) => transports the new value as an argument (see above code example).
   * Returns:
     * Listener ID
 * `removeListener(listenerID)` => it clears the specific listener.
