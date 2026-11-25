@@ -1,16 +1,16 @@
 const globalStateProxyHandler = {
   set(target, key, value) {
     target[key] = value;
-    broadcastStateUpdate(key)
+    broadcastStateUpdate(key, value)
     return {target, key, value};
   }
 };
 
-export const broadcastStateUpdate = (key) => {
+export const broadcastStateUpdate = (key, value) => {
   if (globalThis._globalListeners?.length) {
     globalThis._globalListeners.forEach(item => {
       const [_id, varName, callback] = item;
-      if (varName && key === varName && callback) callback();
+      if (varName && callback && (key === varName)) callback(value);
     });
   }
 }
@@ -23,7 +23,7 @@ const globalState = (initialize = false, initialState = {}, afterInitialize = ()
     afterInitialize();
   };
 
-  const addListener = (varName = null, callback = () => {}) => {
+  const addListener = (varName = null, callback = (newVal) => {}) => {
     const generateRandomId = () => Math.random().toString().replace(".", "");
 
     globalThis._globalListeners ||= [];
