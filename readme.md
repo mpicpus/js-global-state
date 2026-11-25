@@ -4,13 +4,13 @@ This project provides a tiny, basic global state management system without relyi
 
 The state is a global key/value dictionary and It's designed to allow one level splitting.
 
-This state architecture is deliberately mutable: only one single state object is maintained at any given time.
+This state architecture is deliberately mutable: only one single state object is maintained or edited at any given time.
 
 ***
 
 ## Main import:
 
-The main import is globalState: it exposes public functions, and initializes the state if so specified. Initialization is not mandatory unless we'd like to pass an initial state on app launch: `getGlobalState` will create an empty state if not present yet.
+The main import is `globalState`: it exposes public functions, and/or initializes the state if so specified. Initialization is not mandatory unless we'd like to pass an initial state on app launch: `getGlobalState` will create an empty state if not present.
 
 ```javascript
 globalState(initialize = false, initialState = {}, afterInitialize = () => {})
