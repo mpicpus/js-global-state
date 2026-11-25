@@ -34,7 +34,7 @@ globalState(true, initialState, afterInitialize)
 const {getGlobalScope, setGlobalScope, addListener, removeListener} = globalState()
 
 // Subscribe to a key:
-const listenerID = addListener("likes", (newVal) => { this.scope.likes = newVal })
+const listenerID = addListener("score", (newVal) => { this.score = newVal })
 
 // Remove subscription:
 removeListener(listenerID)
